@@ -1,0 +1,32 @@
+version: '3'
+services:
+  planner:
+    build:
+      context: .
+      dockerfile: planner/Dockerfile.planner
+    networks:
+      - mynetwork      
+    ports:
+      - "3000:3000"
+    image: planner
+  worker:
+    build:
+      context: .
+      dockerfile: worker/Dockerfile.worker
+    image: worker
+    depends_on:
+      - planner
+    deploy:
+      replicas: 3
+    networks:
+      - mynetwork      
+    ports:
+        - "3001"
+        - "3002"
+        - "3003"
+
+networks:
+  mynetwork:
+
+
+
