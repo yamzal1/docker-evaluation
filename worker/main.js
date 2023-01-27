@@ -9,8 +9,8 @@ const PLANNER =
     ? process.env.PLANNER
     : 'http://localhost:3000'
 const MULT =
-  process.env.MULT !== undefined ? Boolean(process.env.MULT) : true
-const ADD = process.env.ADD !== undefined ? Boolean(process.env.ADD) : true
+  process.env.MULT !== undefined ? JSON.parse(process.env.MULT) : true
+const ADD = process.env.ADD !== undefined ? JSON.parse(process.env.ADD) : true
 const app = express()
 const port = process.env.PORT || 8080
 const ADDRESS =

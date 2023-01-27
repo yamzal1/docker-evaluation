@@ -13,10 +13,12 @@ const generateTasks = (i) =>
   new Array(i).fill(1).map((_) => ({ type: taskType(), args: args() }))
 
 let workers = [
-   { url: 'http://worker:8080', id: '0' },
-   { url: 'http://worker1:8081', id: '1' }
-
+   { url: 'http://worker:8080', id: '0', type: 'mult' },
+   { url: 'http://worker1:8081', id: '1', type: 'add' }
 ]
+
+let multWorkers = workers.filter((w) => w.type == 'mult');
+let addWorkers = workers.filter((w) => w.type == 'add');
 
 const app = express()
 app.use(express.json())
@@ -45,8 +47,21 @@ const wait = (mili) =>
 
 const sendTask = async (worker, task) => {
   console.log(`=> ${worker.url}/${task.type}`, task)
-  workers = workers.filter((w) => w.id !== worker.id)
+
+  if (worker.type == 'mult'){
+    multWorkers = multWorkers.filter((w) => w.id !== worker.id)
+  }
+
+  if (worker.type == 'add'){
+    addWorkers = addWorkers.filter((w) => w.id !== worker.id)
+  }
+
+
+//  workers = workers.filter((w) => w.id !== worker.id)
+
+
   tasks = tasks.filter((t) => t !== task)
+
   const request = fetch(`${worker.url}/${task.type}`, {
     method: 'POST',
     headers: {
@@ -56,7 +71,17 @@ const sendTask = async (worker, task) => {
     body: JSON.stringify(task.args),
   })
     .then((res) => {
-      workers = [...workers, worker]
+
+      if (worker.type == 'mult'){
+        multWorkers = [...multWorkers, worker]
+      }
+    
+      if (worker.type == 'add'){
+        addWorkers = [...addWorkers, worker]
+      }
+
+
+     // workers = [...workers, worker]
       return res.json()
     })
     .then((res) => {
@@ -75,10 +100,36 @@ const sendTask = async (worker, task) => {
 
 const main = async () => {
   console.log(tasks)
+  console.log("workers : ",workers)
+
+
+  console.log("multworkers : ",multWorkers)
+  console.log("addworkers : ",addWorkers)
+  
   while (taskToDo > 0) {
     await wait(100)
-    if (workers.length === 0 || tasks.length === 0) continue
-    sendTask(workers[0], tasks[0])
+    if (multWorkers.length === 0 || addWorkers.length === 0 || tasks.length === 0) continue
+
+ 
+
+   if(tasks[0].type == 'mult')
+   {
+   multWorkers.length == 0 ? console.log("No worker available") : sendTask(multWorkers[0], tasks[0]) 
+   continue
+  }
+  
+
+  if(tasks[0].type == 'add' )
+  {
+    multWorkers.length == 0 ? tconsole.log("No worker available") : sendTask(addWorkers[0], tasks[0])
+    continue
+  
+  }
+ continue
+
+
+    
+   // sendTask(workers[0], tasks[0])
   }
   console.log('end of tasks')
   server.close()
