@@ -1,0 +1,6 @@
+FROM node:14
+COPY . .
+RUN yarn
+ENV TASKS=4
+EXPOSE 3000
+CMD [ "node", "./planner/main" ]
